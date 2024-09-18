@@ -1,4 +1,5 @@
 #import for html website
+import threading
 from io import BytesIO
 import cv2
 from logging import warning
@@ -7,6 +8,7 @@ from threading import Condition
 from PIL import Image
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import numpy as np
+import sys
 
 #importing required OpenCV modules
 from cv2 import COLOR_RGB2BGR, cvtColor
@@ -145,12 +147,6 @@ class StreamingHandler(BaseHTTPRequestHandler):
 
             finally:
                 cap.release()
-        elif self.path == '/shutdown':
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(b'Server is shutting down...')
-            threading.Thread(target=self.server.shutdown).start()
-
         else:
             #handle 404 error
             self.send_error(404)
@@ -193,13 +189,26 @@ class StreamingServer(HTTPServer):
     daemon_threads = True
 
 
+def run_server():
+    address = ('', 8443)
+    server = StreamingServer(address, StreamingHandler)
+    print("Server started on port 8443. Type 'exit' to stop.")
+    server.serve_forever()
+    
 def init():
-    try:
-        address = ('', 8443)
-        server = StreamingServer(address, StreamingHandler)
-        server.serve_forever()
-    finally:
-        pass
+    server_thread = threading.Thread(target=run_server)
+    server_thread.daemon = True
+    server_thread.start()
+
+    while True:
+        user_input = input("Type 'exit' to stop the server: ")
+        if user_input.strip().lower() == 'exit':
+            break
+
+    print("Shutting down the server...")
+    server.shutdown()
+    server_thread.join()
+    print("Server stopped.")
 
 if __name__ == "__main__":
     init()
