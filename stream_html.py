@@ -142,7 +142,15 @@ class StreamingHandler(BaseHTTPRequestHandler):
                 warning(
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
-                
+
+            finally:
+                cap.release()
+        elif self.path == '/shutdown':
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'Server is shutting down...')
+            threading.Thread(target=self.server.shutdown).start()
+
         else:
             #handle 404 error
             self.send_error(404)
