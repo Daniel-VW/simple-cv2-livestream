@@ -124,6 +124,8 @@ class StreamingHandler(BaseHTTPRequestHandler):
             height = 800
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            fps = 30
+            cap.set(cv2.CAP_PROP_FPS, fps)
 
             try:
                 while True:
