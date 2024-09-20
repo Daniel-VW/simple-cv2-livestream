@@ -120,6 +120,10 @@ class StreamingHandler(BaseHTTPRequestHandler):
             
             self.sendHeader()
             cap = cv2.VideoCapture(0)
+            width = 1920  # Beispiel: 1920x1080 für Full HD
+            height = 1080
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
             try:
                 while True:
