@@ -121,7 +121,7 @@ class StreamingHandler(BaseHTTPRequestHandler):
             self.sendHeader()
 
             try:
-                static_image = Image.open("path/to/your/image.jpg")
+                static_image = Image.open("image.jpg")
                 while True:
                     self.send_frame(static_image)
             except Exception as e:
@@ -146,23 +146,17 @@ class StreamingHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 
-    def send_frame(self, frame):
-        #convert frame to PIL Image
-        if frame is not None:
-            pil_im = Image.fromarray(frame)
+    def send_frame(self, static_image):
+        with BytesIO() as output:
+            static_image.save(output, "JPEG")
+            frame_data = output.getvalue()
 
-            #convert Image to JPEG format and get the frame data
-            with BytesIO() as output:
-                pil_im.save(output, "JPEG")
-                frame_data = output.getvalue()
-
-            #write the frame data to the client
-            self.wfile.write(b'--FRAME\r\n')
-            self.send_header('Content-Type', 'image/jpeg')
-            self.send_header('Content-Length', len(frame_data))
-            self.end_headers()
-            self.wfile.write(frame_data)
-            self.wfile.write(b'\r\n')
+        self.wfile.write(b'--FRAME\r\n')
+        self.send_header('Content-Type', 'image/jpeg')
+        self.send_header('Content-Length', len(frame_data))
+        self.end_headers()
+        self.wfile.write(frame_data)
+        self.wfile.write(b'\r\n')
 
 
 #class to handle StreamingServer
